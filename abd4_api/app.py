@@ -1,6 +1,14 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request
+from flask_restful import Resource, Api
+from flask_jwt import JWT, jwt_required
 
-app =  Flask(__name__)
+from security import authenticate, identity
+
+app = Flask(__name__)
+app.secret_key = 'nassim'
+api = Api(app)
+
+jwt = JWT(app, authenticate, identity) # /auth
 
 reservations = [
     {
@@ -45,28 +53,28 @@ reservations = [
     }
 ]
 
-@app.route('/')
-def home():
-    return "The Début"
+class Acheteur(Resource):
+    @jwt_required()
+    def get(self, email):
+        for reservation in reservations:
+            if reservation["Acheteur"]["Email"] == email:
+                return reservation["Acheteur"], 200
+        return {"message": "Acheteur not found."}, 404
 
-# post reservation
-# @app.route('/reservation', methods=['POST'])
-# def create_reservation():
-#     request_data = request.get_json()
-#     new_reservation = {
-#         "Acheteur": request_data["Acheteur"],
-#         "Game": request_data["Game"],
-#         "Reservation": []
-#     }
-#     reservations.append(new_reservation)
-#     return jsonify(new_reservation)
+    @jwt_required()
+    def post(self, email):
+        data = request.get_json()
+        acheteur = {"Civilite": data["Civilite"], "Nom": data["Nom"], "Prenom": data["Prenom"], "Age": data["Age"], "Email": email}
 
+        reservations.append({"Acheteur": acheteur})
+        return {"Acheteur": acheteur}, 201
 
+class ReservationList(Resource):
+    @jwt_required()
+    def get(self):
+        return reservations
 
-
-# get all the reservations
-@app.route('/reservations')
-def get_all_reservations():
-    return jsonify({"reservation": reservations})
+api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
+api.add_resource(ReservationList, '/reservations')
 
 app.run(port=4242)
