@@ -1,5 +1,5 @@
 from flask import Flask, request
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
@@ -77,4 +77,4 @@ class ReservationList(Resource):
 api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
 api.add_resource(ReservationList, '/reservations')
 
-app.run(port=4242)
+app.run(port=4242, debug=True)
