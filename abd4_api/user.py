@@ -59,6 +59,9 @@ class UserRegister(Resource):
         connection = slite3.connect('database.db')
         cursor = connection.cursor
 
+        if User.find_by_username(data['username']) is not None:
+            return {"message": "This user name already exist."}, 400
+
         query = "INSERT INTO users VALUES (NULL, ?, ?)"
         cursor.execute(query, (data['username'], data['password']))
 

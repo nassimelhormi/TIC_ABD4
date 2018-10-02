@@ -14,7 +14,7 @@
       <file leaf-file-name="app.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1125">
+            <state relative-caret-position="0">
               <caret line="75" column="27" lean-forward="false" selection-start-line="75" selection-start-column="27" selection-end-line="75" selection-end-column="27" />
               <folding>
                 <element signature="e#0#32#0" expanded="true" />
@@ -23,43 +23,17 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="user.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="user.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/user.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="765">
-              <caret line="64" column="27" lean-forward="true" selection-start-line="64" selection-start-column="27" selection-end-line="64" selection-end-column="27" />
+            <state relative-caret-position="719">
+              <caret line="57" column="47" lean-forward="true" selection-start-line="57" selection-start-column="47" selection-end-line="57" selection-end-column="47" />
               <folding>
                 <element signature="e#0#44#0" expanded="true" />
-                <marker date="1538486481878" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
-                <marker date="1538486481878" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
-                <marker date="1538486481878" expanded="true" signature="1787:1824" ph="INSERT INTO users... " />
+                <marker date="1538488638456" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
+                <marker date="1538488638456" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
+                <marker date="1538488638456" expanded="true" signature="1921:1958" ph="INSERT INTO users... " />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="script_database.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/script_database.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="285">
-              <caret line="19" column="18" lean-forward="true" selection-start-line="19" selection-start-column="18" selection-end-line="19" selection-end-column="18" />
-              <folding>
-                <marker date="1538487670342" expanded="true" signature="138:239" ph="CREATE TABLE... users" />
-                <marker date="1538487670342" expanded="true" signature="358:381" ph="INSERT INTO users... " />
-                <marker date="1538487670342" expanded="true" signature="358:382" ph="INSERT INTO users... " />
-                <marker date="1538487670342" expanded="true" signature="358:392" ph="INSERT INTO users... " />
-                <marker date="1538487670342" expanded="true" signature="444:475" ph="SELECT * FRO... users" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="security.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/security.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="22" lean-forward="false" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -79,8 +53,8 @@
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/security.py" />
         <option value="$PROJECT_DIR$/app.py" />
-        <option value="$PROJECT_DIR$/user.py" />
         <option value="$PROJECT_DIR$/script_database.py" />
+        <option value="$PROJECT_DIR$/user.py" />
       </list>
     </option>
   </component>
@@ -222,9 +196,9 @@
           <caret line="25" column="18" lean-forward="false" selection-start-line="25" selection-start-column="18" selection-end-line="25" selection-end-column="18" />
           <folding>
             <element signature="e#0#44#0" expanded="true" />
-            <marker date="1538486481878" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
-            <marker date="1538486481878" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
-            <marker date="1538486481878" expanded="true" signature="1787:1824" ph="INSERT INTO users... " />
+            <marker date="1538488638456" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
+            <marker date="1538488638456" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
+            <marker date="1538488638456" expanded="true" signature="1921:1958" ph="INSERT INTO users... " />
           </folding>
         </state>
       </provider>
@@ -259,23 +233,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1125">
+        <state relative-caret-position="0">
           <caret line="75" column="27" lean-forward="false" selection-start-line="75" selection-start-column="27" selection-end-line="75" selection-end-column="27" />
           <folding>
             <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/user.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
-          <caret line="64" column="27" lean-forward="true" selection-start-line="64" selection-start-column="27" selection-end-line="64" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#44#0" expanded="true" />
-            <marker date="1538486481878" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
-            <marker date="1538486481878" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
-            <marker date="1538486481878" expanded="true" signature="1787:1824" ph="INSERT INTO users... " />
           </folding>
         </state>
       </provider>
@@ -290,6 +251,19 @@
             <marker date="1538487670342" expanded="true" signature="358:382" ph="INSERT INTO users... " />
             <marker date="1538487670342" expanded="true" signature="358:392" ph="INSERT INTO users... " />
             <marker date="1538487670342" expanded="true" signature="444:475" ph="SELECT * FRO... users" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/user.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="719">
+          <caret line="57" column="47" lean-forward="true" selection-start-line="57" selection-start-column="47" selection-end-line="57" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#44#0" expanded="true" />
+            <marker date="1538488638456" expanded="true" signature="484:522" ph="SELECT * FRO... users" />
+            <marker date="1538488638456" expanded="true" signature="984:1021" ph="SELECT * FRO... users" />
+            <marker date="1538488638456" expanded="true" signature="1921:1958" ph="INSERT INTO users... " />
           </folding>
         </state>
       </provider>
