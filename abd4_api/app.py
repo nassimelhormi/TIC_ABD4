@@ -3,6 +3,7 @@ from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
+from user import UserRegister
 
 app = Flask(__name__)
 app.secret_key = 'nassim'
@@ -76,5 +77,6 @@ class ReservationList(Resource):
 
 api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
 api.add_resource(ReservationList, '/reservations')
+api.add_resource(UserRegister, '/register')
 
 app.run(port=4242, debug=True)
