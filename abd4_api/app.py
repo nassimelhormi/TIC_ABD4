@@ -122,14 +122,22 @@ class GameList(Resource):
 
 class Game(Resource):
     def get(self, id):
-        for game in game:
-            if game["game"]["id"] == id:
-                return game["name"], 200
-        return {"message": "game not found."}, 404
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        select_game = "SELECT * FROM game WHERE id_game = {}".format(id)
+        for row in cursor.execute(select_game):
+            return {'id_game': row[0], 'name': row[1]}, 200
+        connection.commit()
+        connection.close()
+        return {'message': 'game not found'}, 404
+        
+        
+
+
 #c'est pas encore terminer
 api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
 api.add_resource(ReservationList, '/reservations')
 api.add_resource(UserRegister, '/register')
 api.add_resource(GameList, '/games')
-api.add_resource(GameList, '/games/<int:id>')
+api.add_resource(Game, '/games/<int:id>')
 app.run(port=4242, debug=True)
