@@ -72,23 +72,6 @@ class Acheteur(Resource):
         reservations.append({"Acheteur": acheteur})
         return {"Acheteur": acheteur}, 201
 
-class ReservationList(Resource):
-    #@jwt_required()
-    def get(self):
-        return reservations
-
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('user')
-        args = parser.parse_args()
-        pprint.pprint(args)
-        return None, 201
-    # TO DO
-    # definire le post (input et output)
-    # comment recevoir les donnees avec postman et les affiche dans la console(pprint)
-    # comment marche la librairie sqlite
-    # inserer les donnees
-
 class GameList(Resource):
 
     def get(self):
@@ -130,14 +113,60 @@ class Game(Resource):
         connection.commit()
         connection.close()
         return {'message': 'game not found'}, 404
-        
-        
 
 
-#c'est pas encore terminer
+class ClientList(Resource):
+
+    def get(self):
+        response = []
+
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        select_client = "SELECT * FROM clients"
+        for row in cursor.execute(select_client):
+            pprint.pprint(row)
+            response.append({'id': row[0], 'gender': row[1], 'age': row[2], 'email': row[3]})
+        connection.commit()
+        connection.close()
+        return response,200   
+   
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('gender')
+        parser.add_argument('age')
+        parser.add_argument('email')
+        args = parser.parse_args()
+        clients = (args['gender'],args['age'], args['email'],)
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        insert_client = "INSERT INTO clients(gender, age, email)  VALUES (?, ?, ?)"
+        cursor.execute(insert_client, clients)
+        select_client = "SELECT last_insert_rowid()"
+        for row in cursor.execute(select_client):
+            last_insert_id = row[0]
+        pprint.pprint(args)
+        connection.commit()
+        connection.close()
+        return {'id': last_insert_id,'gender': args['gender'], 'age': args['age'], 'email': args['email']}, 201   
+
+class ReservationList(Resource):
+    def get(self):
+        response = []
+
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        select_reservation = "SELECT * FROM reservations"
+        for row in cursor.execute(select_reservation):
+            pprint.pprint(row)
+            response.append({'id': row[0], 'day': row[1], 'hour': row[2], 'is_vr': row[3], 'rate': row[4], 'id_game': row[5], 'id_client': row[5]})
+        connection.commit()
+        connection.close()
+        return response,200  
+
 api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
 api.add_resource(ReservationList, '/reservations')
 api.add_resource(UserRegister, '/register')
 api.add_resource(GameList, '/games')
 api.add_resource(Game, '/games/<int:id>')
+api.add_resource(ClientList, '/clients')
 app.run(port=4242, debug=True)
