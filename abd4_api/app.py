@@ -1,9 +1,11 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
-
+import pprint
 from security import authenticate, identity
 from user import UserRegister
+import sqlite3
+
 
 app = Flask(__name__)
 app.secret_key = 'nassim'
@@ -55,14 +57,14 @@ reservations = [
 ]
 
 class Acheteur(Resource):
-    @jwt_required()
+    #@jwt_required() #decorateur
     def get(self, email):
         for reservation in reservations:
             if reservation["Acheteur"]["Email"] == email:
                 return reservation["Acheteur"], 200
         return {"message": "Acheteur not found."}, 404
 
-    @jwt_required()
+    #@jwt_required()
     def post(self, email):
         data = request.get_json()
         acheteur = {"Civilite": data["Civilite"], "Nom": data["Nom"], "Prenom": data["Prenom"], "Age": data["Age"], "Email": email}
@@ -71,12 +73,63 @@ class Acheteur(Resource):
         return {"Acheteur": acheteur}, 201
 
 class ReservationList(Resource):
-    @jwt_required()
+    #@jwt_required()
     def get(self):
         return reservations
 
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('user')
+        args = parser.parse_args()
+        pprint.pprint(args)
+        return None, 201
+    # TO DO
+    # definire le post (input et output)
+    # comment recevoir les donnees avec postman et les affiche dans la console(pprint)
+    # comment marche la librairie sqlite
+    # inserer les donnees
+
+class GameList(Resource):
+
+    def get(self):
+        response = []
+
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        select_game = "SELECT * FROM game"
+        for row in cursor.execute(select_game):
+            response.append({'id': row[0], 'title': row[1]})
+        connection.commit()
+        connection.close()
+        return response,200
+
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('name')
+        args = parser.parse_args()
+        game = (args['name'],)
+        connection = sqlite3.connect('database.db')
+        cursor = connection.cursor()
+        insert_game = "INSERT INTO game(name) VALUES (?)"
+        cursor.execute(insert_game, game)
+        select_game = "SELECT last_insert_rowid()"
+        for row in cursor.execute(select_game):
+            last_insert_id = row[0]
+        pprint.pprint(args)
+        connection.commit()
+        connection.close()
+        return {'id': last_insert_id,'name': args['name']}, 201
+
+class Game(Resource):
+    def get(self, id):
+        for game in game:
+            if game["game"]["id"] == id:
+                return game["name"], 200
+        return {"message": "game not found."}, 404
+#c'est pas encore terminer
 api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
 api.add_resource(ReservationList, '/reservations')
 api.add_resource(UserRegister, '/register')
-
+api.add_resource(GameList, '/games')
+api.add_resource(GameList, '/games/<int:id>')
 app.run(port=4242, debug=True)
