@@ -1,16 +1,20 @@
-from flask_restful import Resource, reqparse
-
-from flask import Flask, current_app as app
+from flask import Flask
+from flask_restful import Resource, reqparse, Api
 from flaskext.mysql import MySQL
 
+# Creating MySQL instance
 mysql = MySQL()
+app = Flask(__name__)
 
 # MySQL configurations
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
 app.config['MYSQL_DATABASE_DB'] = 'vdm_db'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
 mysql.init_app(app)
+api = Api(app)
+
 
 class User:
 
@@ -27,14 +31,17 @@ class User:
         connection = mysql.connect()
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE username = ?"
-        result = cursor.execute(query, (_username,))
-        row = result.fetchone()
+        query = "SELECT * FROM users WHERE username = '{0}'".format(_username)
+        print(_username)
+        print(query)
+        cursor.execute(query)
+        row = cursor.fetchone()
         if row:
             user = cls(*row)
         else:
             user = None
-
+        cursor.close()
+        connection.close()
         return user
 
     # This method find user with id in parameter
@@ -45,15 +52,16 @@ class User:
         connection = mysql.connect()
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE id_user = ?"
-        result = cursor.execute(query, (_id,))
-        row = result.fetchone()
+        query = "SELECT * FROM users WHERE id_user = '{0}'".format(_id)
+        cursor.execute(query)
+        row = cursor.fetchone()
         if row:
             user = cls(*row)
         else:
             user = None
 
         return user
+
 
 class UserRegister(Resource):
 
@@ -71,10 +79,12 @@ class UserRegister(Resource):
         cursor = connection.cursor
 
         if User.find_by_username(data['username']) is not None:
+            cursor.close()
+            connection.close()
             return {"message": "This user name already exist."}, 400
 
         query = "INSERT INTO users VALUES (NULL, ?, ?)"
         cursor.execute(query, (data['username'], data['password']))
-
-
+        cursor.close()
+        connection.close()
         return {"message": "User created successfully."}, 201

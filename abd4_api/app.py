@@ -1,10 +1,9 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
-
+from flaskext.mysql import MySQL
 from security import authenticate, identity
 from user import UserRegister
-import user
 
 app = Flask(__name__)
 app.secret_key = 'nassim'
@@ -55,8 +54,19 @@ reservations = [
     }
 ]
 
+mysql = MySQL()
 
-user.app = app
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
+app.config['MYSQL_DATABASE_DB'] = 'vdm_db'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
+
+
+def get_cursor():
+    return mysql.connect().cursor()
+
 
 class Acheteur(Resource):
     @jwt_required()
