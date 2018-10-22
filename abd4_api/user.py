@@ -1,5 +1,16 @@
 from flask_restful import Resource, reqparse
-import sqlite3
+
+from flask import Flask, current_app as app
+from flaskext.mysql import MySQL
+
+mysql = MySQL()
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
+app.config['MYSQL_DATABASE_DB'] = 'vdm_db'
+app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+mysql.init_app(app)
 
 class User:
 
@@ -13,7 +24,7 @@ class User:
     # @return user
     @classmethod
     def find_by_username(cls, _username):
-        connection = sqlite3.connect('database.db')
+        connection = mysql.connect()
         cursor = connection.cursor()
 
         query = "SELECT * FROM users WHERE username = ?"
@@ -23,7 +34,7 @@ class User:
             user = cls(*row)
         else:
             user = None
-        connection.close()
+
         return user
 
     # This method find user with id in parameter
@@ -31,7 +42,7 @@ class User:
     # @return user
     @classmethod
     def find_by_id(cls, _id):
-        connection = sqlite3.connect('database.db')
+        connection = mysql.connect()
         cursor = connection.cursor()
 
         query = "SELECT * FROM users WHERE id_user = ?"
@@ -41,7 +52,7 @@ class User:
             user = cls(*row)
         else:
             user = None
-        connection.close()
+
         return user
 
 class UserRegister(Resource):
@@ -56,7 +67,7 @@ class UserRegister(Resource):
     # @return 201
     def post(self):
         data = UserRegister.parser.parse_args()
-        connection = slite3.connect('database.db')
+        connection = mysql.connect()
         cursor = connection.cursor
 
         if User.find_by_username(data['username']) is not None:
@@ -65,7 +76,5 @@ class UserRegister(Resource):
         query = "INSERT INTO users VALUES (NULL, ?, ?)"
         cursor.execute(query, (data['username'], data['password']))
 
-        connection.commit()
-        connection.close()
 
         return {"message": "User created successfully."}, 201

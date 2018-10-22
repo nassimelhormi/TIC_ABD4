@@ -8,7 +8,7 @@ create_user_table = "CREATE TABLE IF NOT EXISTS users (id_user INTERGER PRIMARY 
 cursor.execute(create_user_table)
 
 # Insert a user in the "users" table
-user = (18, 'nassim', 'root')
+user = (2, 'asmae', 'root')
 insert_user = "INSERT INTO users VALUES (?, ?, ?)"
 cursor.execute(insert_user, user)
 

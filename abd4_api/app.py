@@ -4,6 +4,7 @@ from flask_jwt import JWT, jwt_required
 
 from security import authenticate, identity
 from user import UserRegister
+import user
 
 app = Flask(__name__)
 app.secret_key = 'nassim'
@@ -53,6 +54,9 @@ reservations = [
         ]
     }
 ]
+
+
+user.app = app
 
 class Acheteur(Resource):
     @jwt_required()
