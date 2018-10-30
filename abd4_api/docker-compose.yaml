@@ -1,0 +1,73 @@
+version: '2'
+
+services: 
+
+  www:
+    image: nginx:1.13.5
+    ports:
+      - 8080:80
+    volumes:
+      - ./config/infra/nginx:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+  app:
+      build: .
+      command: python app.py
+      volumes:
+        - .:/usr/src/app
+      depends_on:
+      - mysqlmaster
+      - mysqlslave
+  
+  mysqlmaster:
+    image: mysql:5.7.15
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_DATABASE=vdm_db"
+      - "MYSQL_USER=vdm"
+      - "MYSQL_PASSWORD=vdm"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - ./data/mysql-master:/var/lib/mysql/
+      - ./config/infra/mysql-master:/etc/mysql/conf.d/
+      - ./data/dump:/docker-entrypoint-initdb.d
+
+  mysqlslave:
+    image: mysql:5.7.15
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_DATABASE=vdm_db"
+      - "MYSQL_USER=vdm"
+      - "MYSQL_PASSWORD=vdm"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - ./data/mysql-slave:/var/lib/mysql/
+      - ./config/infra/mysql-slave:/etc/mysql/conf.d/ 
+      - ./data/dump:/docker-entrypoint-initdb.d
+
+  mysqlslave2:
+    image: mysql:5.7.15
+    environment:
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_DATABASE=vdm_db"
+      - "MYSQL_USER=vdm"
+      - "MYSQL_PASSWORD=vdm"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - ./data/mysql-slave2:/var/lib/mysql/
+      - ./config/infra/mysql-slave2:/etc/mysql/conf.d/ 
+      - ./data/dump:/docker-entrypoint-initdb.d
+
+  mysqlconfigure:
+    image: mysql:5.7.15
+    environment:
+      - "MYSQL_SLAVE_PASSWORD=root"
+      - "MYSQL_MASTER_PASSWORD=root"
+      - "MYSQL_ROOT_PASSWORD=root"
+      - "MYSQL_REPLICATION_USER=repl"
+      - "MYSQL_REPLICATION_PASSWORD=repl"
+      - "MYSQL_ROOT_HOST=%"
+    volumes:
+      - ./config/infra/master-slave-configurator.sh:/tmp/mysql_connector.sh
+    command: /bin/bash -x /tmp/mysql_connector.sh

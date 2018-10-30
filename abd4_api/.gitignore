@@ -114,11 +114,3 @@ dmypy.json
 .pyre/
 
 .vscode/
-
-abd4_api/data/mysql-master/*
-abd4_api/data/mysql-slave/*
-abd4_api/data/mysql-slave2/*
-
-.DS_Store
-
-ha/

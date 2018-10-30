@@ -1,15 +1,23 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from flask_jwt import JWT, jwt_required
+from flaskext.mysql import MySQL
 import pprint
 from security import authenticate, identity
 from user import UserRegister
-import sqlite3
 
-
+# Creating MySQL instance
+mysql = MySQL()
 app = Flask(__name__)
 app.secret_key = 'nassim'
+mysql.init_app(app)
 api = Api(app)
+
+# MySQL configurations
+app.config['MYSQL_DATABASE_USER'] = 'root'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
+app.config['MYSQL_DATABASE_DB'] = 'vdm_db'
+app.config['MYSQL_DATABASE_HOST'] = 'mysqlmaster'
 
 jwt = JWT(app, authenticate, identity) # /auth
 
@@ -56,117 +64,122 @@ reservations = [
     }
 ]
 
-class Acheteur(Resource):
-    #@jwt_required() #decorateur
-    def get(self, email):
-        for reservation in reservations:
-            if reservation["Acheteur"]["Email"] == email:
-                return reservation["Acheteur"], 200
-        return {"message": "Acheteur not found."}, 404
+def create_reservation(day, hour, is_vr, g_name):
 
-    #@jwt_required()
-    def post(self, email):
-        data = request.get_json()
-        acheteur = {"Civilite": data["Civilite"], "Nom": data["Nom"], "Prenom": data["Prenom"], "Age": data["Age"], "Email": email}
+    connection = mysql.connect()
+    cursor = connection.cursor()
+    insert_reservation = "INSERT INTO reservations(day, hour, is_vr,g_name)  VALUES (%s, %s, %s, %s)"
+    reservations = (day,hour,is_vr,g_name,)
+    cursor.execute(insert_reservation, reservations)
+    select_reservation = "SELECT  LAST_INSERT_ID();"
+    cursor.execute(select_reservation)
+    rows = cursor.fetchall()
+    id_reservation = rows[0]
+    connection.commit()
+    connection.close()
+    return (id_reservation)
 
-        reservations.append({"Acheteur": acheteur})
-        return {"Acheteur": acheteur}, 201
+def get_clients(json_data):
+    client_list = []
+    acheteur = json_data['Acheteur']
+    k = {
+        'gender' : acheteur['Civilite'],
+        'age'    : acheteur['Age'],
+        'email'  : acheteur['Email'],
+        'first_name': acheteur['Nom'],
+        'last_name' : acheteur['Prenom'],
+        'is_acheteur' : True
+    }
+    for reservation in json_data['Reservation']:
+        d = {
+            'gender' : reservation['Spectateur']['Civilite'],
+            'age'    : reservation['Spectateur']['Age'],
+            'email'  : '',
+            'first_name': reservation['Spectateur']['Nom'],
+            'last_name' : reservation['Spectateur']['Prenom'],
+            'tarif'    : reservation['Tarif'],
+            'is_acheteur' : False
+        }
+        if (d['first_name'] != k['first_name'] and d['last_name'] != k['last_name']):
+            client_list.append(d)
+        else:
+            k['tarif'] = reservation['Tarif']
+    client_list.append(k)
+    return client_list
+        
+def find_client(gender, first_name, last_name):
+    connection = mysql.connect()
+    cursor = connection.cursor()
+    clt_selected_tuple = (gender, first_name, last_name,)
+    select_client = "SELECT id_client FROM Clients WHERE gender = %s AND first_name = %s AND last_name = %s"
+    cursor.execute(select_client,clt_selected_tuple)
+    rows = cursor.fetchall()
+    pprint.pprint(rows)
+    connection.commit()
+    connection.close()
+    if len(rows) == 1:
+        return rows[0]
+    return None
 
-class GameList(Resource):
+def insert_clients(list_clients):
+    connection = mysql.connect()
+    cursor = connection.cursor()
+    list_ids = []
+    for client in list_clients:
+        founded_client = find_client(client['gender'],client['first_name'],client['last_name'])
+        print("founded_client = {}".format(founded_client))
+        if founded_client == None:
+            try:
+                clients_tuple = (client['gender'],client['age'],client['email'],client['first_name'],client['last_name'],client['tarif'],client['is_acheteur'],)
+                insert_query = "INSERT INTO Clients(gender,age,email,first_name,last_name,tarif,is_acheteur) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                cursor.execute(insert_query, clients_tuple)
+                select_id_client = "SELECT  LAST_INSERT_ID();"
+                cursor.execute(select_id_client)
+                rows = cursor.fetchall()
+                inserted_client = rows[0][0]
+                print("inserted_client ->", inserted_client)
+                list_ids.append(inserted_client)
+            except Exception as e:
+                print("Exception ----> {}".format(str(e)))
+        else:
+            list_ids.append(founded_client)
 
-    def get(self):
-        response = []
+    connection.commit()
+    connection.close()
+    print("c'est de la merde ici ------>")
+    pprint.pprint(list_ids)
+    return list_ids
+    
 
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        select_game = "SELECT * FROM game"
-        for row in cursor.execute(select_game):
-            response.append({'id': row[0], 'title': row[1]})
-        connection.commit()
-        connection.close()
-        return response,200
+def insert_spectateurs(list_ids,id_reservation):
+    connection = mysql.connect()
+    cursor = connection.cursor()
+    pprint.pprint(list_ids)
+    for id_clients in list_ids:
+        spect_tuple = (id_clients, id_reservation,)
+        query = "INSERT INTO Spectateurs(id_client,id_reservation) VALUES(%s, %s)"
+        print(query)
+        print(spect_tuple)
+        cursor.execute(query, spect_tuple)
+    connection.commit()
+    connection.close()
 
+class booking(Resource):
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('name')
-        args = parser.parse_args()
-        game = (args['name'],)
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        insert_game = "INSERT INTO game(name) VALUES (?)"
-        cursor.execute(insert_game, game)
-        select_game = "SELECT last_insert_rowid()"
-        for row in cursor.execute(select_game):
-            last_insert_id = row[0]
-        pprint.pprint(args)
-        connection.commit()
-        connection.close()
-        return {'id': last_insert_id,'name': args['name']}, 201
+        json_data = request.get_json(force=True)
+        day = json_data['Game']['Jour']
+        hour = json_data['Game']['Horaire']
+        is_vr = 1 if json_data['Game']['VR'] == "Non" else 0
+        g_name = json_data['Game']['Nom']
 
-class Game(Resource):
-    def get(self, id):
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        select_game = "SELECT * FROM game WHERE id_game = {}".format(id)
-        for row in cursor.execute(select_game):
-            return {'id_game': row[0], 'name': row[1]}, 200
-        connection.commit()
-        connection.close()
-        return {'message': 'game not found'}, 404
+        id_reservation = create_reservation(day,hour,is_vr,g_name)
+        client_list = get_clients(json_data)
+        insered_clients = insert_clients(client_list)
+        insert_spectateurs(insered_clients,id_reservation) 
+        return {'id': id_reservation,'day': day, 'hour': hour, 'is_vr': is_vr, 'g_name': g_name}, 201 
+        
 
 
-class ClientList(Resource):
 
-    def get(self):
-        response = []
-
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        select_client = "SELECT * FROM clients"
-        for row in cursor.execute(select_client):
-            pprint.pprint(row)
-            response.append({'id': row[0], 'gender': row[1], 'age': row[2], 'email': row[3]})
-        connection.commit()
-        connection.close()
-        return response,200   
-   
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('gender')
-        parser.add_argument('age')
-        parser.add_argument('email')
-        args = parser.parse_args()
-        clients = (args['gender'],args['age'], args['email'],)
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        insert_client = "INSERT INTO clients(gender, age, email)  VALUES (?, ?, ?)"
-        cursor.execute(insert_client, clients)
-        select_client = "SELECT last_insert_rowid()"
-        for row in cursor.execute(select_client):
-            last_insert_id = row[0]
-        pprint.pprint(args)
-        connection.commit()
-        connection.close()
-        return {'id': last_insert_id,'gender': args['gender'], 'age': args['age'], 'email': args['email']}, 201   
-
-class ReservationList(Resource):
-    def get(self):
-        response = []
-
-        connection = sqlite3.connect('database.db')
-        cursor = connection.cursor()
-        select_reservation = "SELECT * FROM reservations"
-        for row in cursor.execute(select_reservation):
-            pprint.pprint(row)
-            response.append({'id': row[0], 'day': row[1], 'hour': row[2], 'is_vr': row[3], 'rate': row[4], 'id_game': row[5], 'id_client': row[5]})
-        connection.commit()
-        connection.close()
-        return response,200  
-
-api.add_resource(Acheteur, '/acheteur/<string:email>') # http://localhost:4242/acheteur/nassimelhormi@dailymotion.com
-api.add_resource(ReservationList, '/reservations')
-api.add_resource(UserRegister, '/register')
-api.add_resource(GameList, '/games')
-api.add_resource(Game, '/games/<int:id>')
-api.add_resource(ClientList, '/clients')
-app.run(port=4242, debug=True)
+api.add_resource(booking, '/booking')
+app.run(host='0.0.0.0', port=5000, debug=True)
