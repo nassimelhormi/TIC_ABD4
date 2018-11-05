@@ -23,3 +23,5 @@ pytz==2018.5
 six==1.11.0
 SQLAlchemy==1.2.12
 Werkzeug==0.14.1
+redis==2.10.6
+rq==0.12.0

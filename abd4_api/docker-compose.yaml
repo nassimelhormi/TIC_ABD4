@@ -1,6 +1,6 @@
 version: '2'
 
-services: 
+services:
 
   www:
     image: nginx:1.13.5
@@ -13,12 +13,17 @@ services:
 
   app:
       build: .
-      command: python app.py
+      command: /bin/bash -x start_app.sh
       volumes:
         - .:/usr/src/app
+      environment:
+        - "DB_MASTER=mysqlmaster"
+        - "DB_SLAVES=mysqlslave,mysqlslave2"
       depends_on:
-      - mysqlmaster
-      - mysqlslave
+        - mysqlmaster
+        - mysqlslave
+        - mysqlslave2
+        - redis
   
   mysqlmaster:
     image: mysql:5.7.15
@@ -71,3 +76,27 @@ services:
     volumes:
       - ./config/infra/master-slave-configurator.sh:/tmp/mysql_connector.sh
     command: /bin/bash -x /tmp/mysql_connector.sh
+  
+  redis:
+    image: redis:4.0.5-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+
+  worker:
+    build: .
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - mysqlmaster
+      - redis
+    command: ["python", "worker.py"]
+
+  worker-failed:
+    build: .
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - mysqlmaster
+      - redis
+    command: ["python", "worker.py", "failed"]
+      
