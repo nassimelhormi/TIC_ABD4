@@ -1,6 +1,8 @@
 import pymysql.cursors
 import random
 import logging
+import pprint
+
 
 connection = pymysql.connect(host='mysqlmaster',
                              user='vdm',
@@ -119,6 +121,7 @@ def insert_clients(list_clients):
                 is_acheteur = 0 if client['is_acheteur'] == True else 1
                 values = (client['gender'],client['age'],client['email'],client['first_name'],client['last_name'],client['tarif'],is_acheteur,)
                 sql = "INSERT INTO Clients(gender,age,email,first_name,last_name,tarif,is_acheteur) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+                pprint.pprint(sql)
                 inserted_client = insert(sql, values)
                 logging.info("inserted_client = {}".format(inserted_client))
                 list_ids.append(inserted_client)
@@ -146,6 +149,9 @@ def process(json_data):
         is_vr = 1 if json_data['Game']['VR'] == "Non" else 0
         g_name = json_data['Game']['Nom']
 
+        logging.info("Inter booking.process")
+        logging.info(json_data)
+        logging.info("Create reservation")
         id_reservation = create_reservation(day,hour,is_vr,g_name)
         logging.info("New reservation created with ID = {}".format(id_reservation))
         client_list = get_clients(json_data)

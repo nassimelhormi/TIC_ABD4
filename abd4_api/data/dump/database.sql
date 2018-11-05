@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:3306
--- Généré le :  mar. 30 oct. 2018 à 16:25
+-- Généré le :  lun. 05 nov. 2018 à 20:16
 -- Version du serveur :  5.6.35
 -- Version de PHP :  7.1.6
 
@@ -27,7 +27,7 @@ CREATE TABLE `Clients` (
   `email` varchar(45) DEFAULT NULL,
   `first_name` varchar(64) NOT NULL,
   `last_name` varchar(64) NOT NULL,
-  `tarif` enum('Plein Tarif','Senior','Etudiant','Junior') NOT NULL,
+  `tarif` enum('Plein tarif','Senior','Tarif etudiant','Tarif reduit') NOT NULL,
   `is_acheteur` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -37,7 +37,7 @@ CREATE TABLE `Clients` (
 
 INSERT INTO `Clients` (`id_client`, `gender`, `age`, `email`, `first_name`, `last_name`, `tarif`, `is_acheteur`) VALUES
 (64, 'Monsieur', 64, 'carmine.art@gogole.com', 'Carmine', 'Art', 'Senior', 1),
-(63, 'Madame', 22, '', 'Nya', 'Kayla', 'Plein Tarif', 0);
+(63, 'Madame', 22, '', 'Nya', 'Kayla', 'Plein tarif', 0);
 
 -- --------------------------------------------------------
 
