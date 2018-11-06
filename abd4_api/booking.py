@@ -13,13 +13,44 @@ connection = pymysql.connect(host='mysqlmaster',
 
 
 
-# select_mysql_slave = random.choice(['mysqlslave', 'mysqlslave2'])
-# connection_ro = pymysql.connect(host=select_mysql_slave,
-#                              user='vdm',
-#                              password='vdm',
-#                              db='vdm_db',
-#                              autocommit=True,
-#                              cursorclass=pymysql.cursors.DictCursor)
+select_mysql_slave = random.choice(['mysqlslave', 'mysqlslave2'])
+connection_ro = pymysql.connect(host=select_mysql_slave,
+                             user='vdm',
+                             password='vdm',
+                             db='vdm_db',
+                             autocommit=True,
+                             cursorclass=pymysql.cursors.DictCursor)
+
+
+def select_all_bookings():
+    sql = "SELECT * " \
+          "FROM Reservations " \
+          "LEFT JOIN Spectateurs ON Reservations.id_reservation = Spectateurs.id_reservation " \
+          "LEFT JOIN Clients ON Spectateurs.id_client = Clients.id_client"
+    logging.warning(sql);
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            logging.info(result)
+            return result
+    except Exception as e:
+        print(str(e))
+        return None
+
+
+def count_all_bookings():
+    sql = "SELECT COUNT(*) AS `nb_bookings` FROM Reservations WHERE 1 = 1" # replace connection master par connection slev
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            logging.info(result)
+            return result
+    except (pymysql.err.OperationalError, pymysql.ProgrammingError, pymysql.InternalError,
+                    pymysql.IntegrityError, TypeError) as error:
+        logging.warning("insert Exception -> {}, SQL={}".format(str(error), sql))
+        return False
 
 
 def insert(sql, values):

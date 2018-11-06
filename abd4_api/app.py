@@ -57,6 +57,23 @@ RESERVATIONS = [
 ]
 
 
+class bookingALL(Resource):
+    def get(self):
+        res = booking.select_all_bookings()
+
+        if res:
+            return {"message": "ok", "results": res}, 200
+        return {"message": "Something goes wrong"}, 401
+
+
+class bookingCOUNT(Resource):
+    def get(self):
+        res = booking.count_all_bookings()
+
+        if res:
+            return {"message": "ok", "results": res}, 200
+        return {"message": "Something goes wrong"}, 401
+
 
 class bookingREST(Resource):
     def post(self):
@@ -73,5 +90,7 @@ class ping(Resource):
 
 
 api.add_resource(ping, '/ping')
+api.add_resource(bookingALL, '/all')
+api.add_resource(bookingCOUNT, '/count')
 api.add_resource(bookingREST, '/booking')
 app.run(host='0.0.0.0', port=5000, debug=True)
