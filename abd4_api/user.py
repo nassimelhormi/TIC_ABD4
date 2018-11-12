@@ -1,20 +1,5 @@
-from flask import Flask
-from flask_restful import Resource, reqparse, Api
-from flaskext.mysql import MySQL
-
-# Creating MySQL instance
-mysql = MySQL()
-app = Flask(__name__)
-
-# MySQL configurations
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
-app.config['MYSQL_DATABASE_DB'] = 'vdm_db'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-
-mysql.init_app(app)
-api = Api(app)
-
+from flask_restful import Resource, reqparse
+import sqlite3
 
 class User:
 
@@ -28,19 +13,16 @@ class User:
     # @return user
     @classmethod
     def find_by_username(cls, _username):
-        connection = mysql.connect()
+        connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE username = '{0}'".format(_username)
-        print(_username)
-        print(query)
-        cursor.execute(query)
-        row = cursor.fetchone()
+        query = "SELECT * FROM users WHERE username = ?"
+        result = cursor.execute(query, (_username,))
+        row = result.fetchone()
         if row:
             user = cls(*row)
         else:
             user = None
-        cursor.close()
         connection.close()
         return user
 
@@ -49,19 +31,18 @@ class User:
     # @return user
     @classmethod
     def find_by_id(cls, _id):
-        connection = mysql.connect()
+        connection = sqlite3.connect('database.db')
         cursor = connection.cursor()
 
-        query = "SELECT * FROM users WHERE id_user = '{0}'".format(_id)
-        cursor.execute(query)
-        row = cursor.fetchone()
+        query = "SELECT * FROM users WHERE id_user = ?"
+        result = cursor.execute(query, (_id,))
+        row = result.fetchone()
         if row:
             user = cls(*row)
         else:
             user = None
-
+        connection.close()
         return user
-
 
 class UserRegister(Resource):
 
@@ -75,16 +56,16 @@ class UserRegister(Resource):
     # @return 201
     def post(self):
         data = UserRegister.parser.parse_args()
-        connection = mysql.connect()
+        connection = slite3.connect('database.db')
         cursor = connection.cursor
 
         if User.find_by_username(data['username']) is not None:
-            cursor.close()
-            connection.close()
             return {"message": "This user name already exist."}, 400
 
         query = "INSERT INTO users VALUES (NULL, ?, ?)"
         cursor.execute(query, (data['username'], data['password']))
-        cursor.close()
+
+        connection.commit()
         connection.close()
+
         return {"message": "User created successfully."}, 201

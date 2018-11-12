@@ -1,5 +1,6 @@
 <?php
 
+date_default_timezone_get("UTC");
 use EscapeGame\Database;
 
 require_once 'lib/autoload.php';
@@ -56,5 +57,21 @@ while (true) {
     }
 
     echo(json_encode($result));
+    echo PHP_EOL;
+
+    $json_result = json_encode($result);
+    $options = [
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => $json_result,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($json_result)
+        ]
+    ];
+    $ch = curl_init('http://127.0.0.1:8080/booking'); // route post reservations
+    curl_setopt_array($ch,$options);
+    $response = curl_exec($ch);
+    echo json_encode($response);
     echo PHP_EOL;
 }
